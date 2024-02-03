@@ -1,5 +1,6 @@
 from flask import render_template, jsonify, request
 from app import app
+import random
 
 # with all the hype around  AI this projects allows for users to understand that the quality of the information that AI tools output, significantly depends on the data that the ai model is fed. This project brings awarness to the problem of data, its regulations to avoid bias and other unethical practices, this will be even more important in the future as dependance of humanity on AI increases (give an official reference).
 
@@ -111,41 +112,64 @@ def preprocess_images_and_labels(drawings):
 
 @app.route('/train-model', methods=['POST'])
 def train_model():
-    global drawings  # Ensure you're using the global variable
+    global drawings  
 
-
-    # min number of samples if 10 
-    # if len(drawings) < 10:
-    #     return jsonify({'error': 'You need to provide at least 10 samples to train the model'})
-
-    #then get the closest n 10 number and multiply by 10 (14 -> 100, 22 -> 200, 45 -> 500) and adjust the number of samples to be the same for each digit   
-
-    # save this code so that you can include it in your documentation and how you solved it.
-    n = 1  # Number of times to duplicate each element within the list
-    m = 20  # Number of times to repeat the entire list
-
-    # Duplicate each element in the drawings list 'n' times
-    duplicated_drawings = [drawing for drawing in drawings for _ in range(n)]
-
-    # Repeat the entire list 'm' times
-    drawings = duplicated_drawings * m
+    # at this stage drawing contains 10 samples, because it was checked in js
     
-    # Preprocess the images and labels
-    x_train, y_train = preprocess_images_and_labels(drawings)
+    # round to the nearest 10 the len of drawings to get the total number of samples we need.
+    numberOfSamples = round(len(drawings) / 10) * 100
+    numberOfSamplesPerDigit = numberOfSamples / 10
+
+    def getAllItemsOfLabel(data, label):
+        items_with_label = []
+
+        for item in data:
+            if item['label'] == label:
+                items_with_label.append(item)
+
+        return items_with_label
+    
+    def addSamples(data, numberOfSamplesPerDigit):
+        if not data:
+            return data
+        while len(data) < numberOfSamplesPerDigit:
+            data.append(random.choice(data))  
+        return data
+    
+    label0array = getAllItemsOfLabel(drawings, '0')
+    label1array = getAllItemsOfLabel(drawings, '1')
+    label2array = getAllItemsOfLabel(drawings, '2')
+    label3array = getAllItemsOfLabel(drawings, '3')
+    label4array = getAllItemsOfLabel(drawings, '4')
+    label5array = getAllItemsOfLabel(drawings, '5')
+    label6array = getAllItemsOfLabel(drawings, '6')
+    label7array = getAllItemsOfLabel(drawings, '7')
+    label8array = getAllItemsOfLabel(drawings, '8')
+    label9array = getAllItemsOfLabel(drawings, '9')
+
+    addSamples(label0array, numberOfSamplesPerDigit)
+    addSamples(label1array, numberOfSamplesPerDigit)
+    addSamples(label2array, numberOfSamplesPerDigit)
+    addSamples(label3array, numberOfSamplesPerDigit)
+    addSamples(label4array, numberOfSamplesPerDigit)
+    addSamples(label5array, numberOfSamplesPerDigit)
+    addSamples(label6array, numberOfSamplesPerDigit)
+    addSamples(label7array, numberOfSamplesPerDigit)
+    addSamples(label8array, numberOfSamplesPerDigit)
+    addSamples(label9array, numberOfSamplesPerDigit)
+
+    drawingsUpdates = label0array + label1array + label2array + label3array + label4array + label5array + label6array + label7array + label8array + label9array
+
+    x_train, y_train = preprocess_images_and_labels(drawingsUpdates)
     
   
-    # Compile the model
     model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
     
-    # Train the model
     batch_size = 30
     epochs = 5
     model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
-    
- 
-    
-    # Clear the drawings list after training
-    drawings = []
+
+    print(len(drawingsUpdates))
     
     return jsonify({'message': 'Model trained successfully'})
 
