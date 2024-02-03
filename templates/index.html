@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Draw a Number</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <!-- <script src="../static/css/style.css"></script> -->
+</head>
+
+<body>
+
+    <h1 class="title">TRAIN YOUR MODEL</h1>
+
+    <div class="topArea">
+        <div class="leftSection">
+
+
+
+
+            <!-- when i scroll down there is an offset -->
+            
+            <!-- adjust the number of samples based on the number of samples the user inputs, calibration can be one of the steps in the development process. -->
+
+            <!-- currently you can save a white canvas which should not be allowed, include this is the documentation -->
+            
+            
+            <canvas class="UIstyle" id="draw-canvas"></canvas>
+        </div>
+        <div class="rightSection">
+            <div class="numsaveclear">
+                <h1 class="UIstyle number" id="numberToDraw">{{ random_number }}</h1>
+                <div class="saveclear">
+                    <button class="UIstyle " id="saveDrawing">Save</button>
+                    <button class="UIstyle topAreaClearbtn" id="clearCanvas">Clear</button>
+                </div>
+            </div>
+            <button class="UIstyle" id="trainModel">Train Model</button>
+        </div>
+    </div>
+
+    <div class="bottomArea">
+        <div class="leftSection">
+            <canvas class="UIstyle" id="draw-canvas-predict" style="border: 1px solid #000;"></canvas>
+        </div>
+        <div class="rightSection">
+            <button class="UIstyle" id="predictButton">Predict</button>
+            <div class="clearpred">
+                <h1 class="UIstyle number" id="predictionResult">0</h1>
+                <button class="UIstyle bottomAreaClearbtn" id="clearCanvas">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart">
+        <!-- do last you need to pass an array of all the values get the largest value and that would be for example 200 px and calculate all the other sizes -->
+    </div>
+    
+    <footer>
+        <p>Created by <a href="#">© Artem Dumchev</a></p>
+    </footer>
+
+</body>
+
+</html>
