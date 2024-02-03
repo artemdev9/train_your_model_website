@@ -1,6 +1,12 @@
 from flask import render_template, jsonify, request
 from app import app
 import random
+import base64
+import numpy as np
+from PIL import Image
+from io import BytesIO
+import tensorflow.keras as keras
+from tensorflow.keras import Sequential, layersz
 
 # with all the hype around  AI this projects allows for users to understand that the quality of the information that AI tools output, significantly depends on the data that the ai model is fed. This project brings awarness to the problem of data, its regulations to avoid bias and other unethical practices, this will be even more important in the future as dependance of humanity on AI increases (give an official reference).
 
@@ -19,12 +25,10 @@ import random
 # the number of samples has to be the same for each digit other ways the model will have a big bias towards the digit that has the most samples, need to fix the code so that once the user has provided 10 samples and they provide more, they might stop on a random number like 2 so the model will have 1 cycle od numbers, and then an addition to that 0, 1, 2 samples from the next cycle that has not been completed , so this needs to be addressed in the code by counting how many samples are for each digit and making sure that there are 100 samples of each digit, right now i am just multiplying the whole dataset by 20 which is not ideal
 
 #possible improvements: allow the user to train the model see the results than train the model more. Currently you can submit an empty canvas to train the model on this is not good, and the user should not be able to do that.
+
+
 drawings = []
 
-from tensorflow.keras import Sequential, layers
-
-# Define the model structure globally
-# change the model to a one that would be more suitable for the task
 model = Sequential([
     layers.InputLayer(input_shape=(28, 28, 1)),
     layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
@@ -78,33 +82,18 @@ from tensorflow.keras import layers
 
 def preprocess_images_and_labels(drawings):
     x_train = []
-    y_train = []
-    
+    y_train = []    
     for item in drawings:
-        # Decode the image
         image_data = base64.b64decode(item['image'].split(',')[1])
-        image = Image.open(BytesIO(image_data))
-        
-        # Resize and convert to grayscale if necessary
-        image_resized = image.resize((28, 28)).convert('L')
-        
-        # Convert to numpy array and scale the pixel values
-        image_array = np.array(image_resized, dtype=np.float32) / 255.0
-        
-        # Append to the training data
-        x_train.append(image_array)
-        
-        # Append the label
+        image = Image.open(BytesIO(image_data))        
+        image_resized = image.resize((28, 28)).convert('L')       
+        image_array = np.array(image_resized, dtype=np.float32) / 255.0        
+        x_train.append(image_array)    
         y_train.append(int(item['label']))
-    
-    # Convert lists to numpy arrays
     x_train = np.array(x_train)
     y_train = np.array(y_train)
-    
-    # Add a channel dimension and one-hot encode labels
     x_train = np.expand_dims(x_train, -1)
     y_train = keras.utils.to_categorical(y_train, 10)
-    
     return x_train, y_train
 
 
@@ -112,11 +101,7 @@ def preprocess_images_and_labels(drawings):
 
 @app.route('/train-model', methods=['POST'])
 def train_model():
-    global drawings  
-
-    # at this stage drawing contains 10 samples, because it was checked in js
-    
-    # round to the nearest 10 the len of drawings to get the total number of samples we need.
+    global drawings      
     numberOfSamples = round(len(drawings) / 10) * 100
     numberOfSamplesPerDigit = numberOfSamples / 10
 
@@ -127,14 +112,14 @@ def train_model():
             if item['label'] == label:
                 items_with_label.append(item)
 
-        return items_with_label
-    
+        return items_with_label   
+     
     def addSamples(data, numberOfSamplesPerDigit):
         if not data:
             return data
         while len(data) < numberOfSamplesPerDigit:
             data.append(random.choice(data))  
-        return data
+        return data    
     
     label0array = getAllItemsOfLabel(drawings, '0')
     label1array = getAllItemsOfLabel(drawings, '1')
@@ -146,7 +131,6 @@ def train_model():
     label7array = getAllItemsOfLabel(drawings, '7')
     label8array = getAllItemsOfLabel(drawings, '8')
     label9array = getAllItemsOfLabel(drawings, '9')
-
     addSamples(label0array, numberOfSamplesPerDigit)
     addSamples(label1array, numberOfSamplesPerDigit)
     addSamples(label2array, numberOfSamplesPerDigit)
@@ -157,54 +141,32 @@ def train_model():
     addSamples(label7array, numberOfSamplesPerDigit)
     addSamples(label8array, numberOfSamplesPerDigit)
     addSamples(label9array, numberOfSamplesPerDigit)
-
     drawingsUpdates = label0array + label1array + label2array + label3array + label4array + label5array + label6array + label7array + label8array + label9array
-
     x_train, y_train = preprocess_images_and_labels(drawingsUpdates)
-    
-  
     model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-    
     batch_size = 30
     epochs = 5
     model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
-
     print(len(drawingsUpdates))
-    
     return jsonify({'message': 'Model trained successfully'})
 
 
 def preprocess_drawn_image(drawn_image_data):
-    # Assuming 'drawn_image_data' contains the base64 encoded image data
     image_data = base64.b64decode(drawn_image_data.split(',')[1])
     image = Image.open(BytesIO(image_data))
     image_resized = image.resize((28, 28)).convert('L')
     image_array = np.array(image_resized, dtype=np.float32) / 255.0
     image_array = np.expand_dims(image_array, -1)
-    
     return image_array
-
-
-# @app.route('/predict')
-# def predict_page():
-#     return render_template('predict.html')
-
 
 @app.route('/make-prediction', methods=['POST'])
 def make_prediction():
     data = request.get_json()
     drawn_image_data = data['drawn_image_data']
-
-    # Preprocess the drawn image
     drawn_image = preprocess_drawn_image(drawn_image_data)
-
-    # Make a prediction using the trained model
     predictions = model.predict(np.array([drawn_image]))
     predicted_number = np.argmax(predictions)
-       # Convert numpy int64 to native Python int
     predicted_number = int(predicted_number)
-
     print(f'Predicted number: {predicted_number}')
-
     return jsonify({'predicted_number': predicted_number})
 
