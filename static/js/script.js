@@ -2,8 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const canvas = document.getElementById("draw-canvas"); // Changed to 'draw-canvas-predict'
   const ctx = canvas.getContext("2d");
   // Set the background color
-  ctx.fillStyle = "#ffffff"; // Set to white or any other color you prefer
-  ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the entire canvas
+  clearCanvas(canvas);
 
   let drawing = false;
 
@@ -20,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function draw(e) {
     if (!drawing) return;
 
-    ctx.lineWidth = 16; // Line width
+    ctx.lineWidth = 20; // Line width
     ctx.lineCap = "round"; // Line cap style
 
     // Adjust for the offset of the canvas
@@ -43,8 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const canvas = document.getElementById("draw-canvas-predict"); // Changed to 'draw-canvas-predict'
   const ctx = canvas.getContext("2d");
   // Set the background color
-  ctx.fillStyle = "#ffffff"; // Set to white or any other color you prefer
-  ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the entire canvas
+  clearCanvas(canvas);
 
   let drawing = false;
 
@@ -61,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function draw(e) {
     if (!drawing) return;
 
-    ctx.lineWidth = 16; // Line width
+    ctx.lineWidth = 20; // Line width
     ctx.lineCap = "round"; // Line cap style
 
     // Adjust for the offset of the canvas
@@ -80,45 +78,73 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-function updateTrainButtonState() {
+document.addEventListener("DOMContentLoaded", function () {
+  updateTrainState();
+});
+
+function updateTrainState() {
   const trainModelButton = document.getElementById("trainModel");
+  const canvasPredict = document.getElementById("draw-canvas-predict");
+  const predictButton = document.getElementById("predictButton");
+  const predictionResult = document.getElementById("predictionResult");
+  const clearCanvasButton = document.getElementById("clearCanvasPred");
+
   if (drawingCount < 10) {
-    trainModelButton.style.backgroundColor = "grey"; // Make the button grey
+    trainModelButton.style.backgroundColor = "grey";
+    canvasPredict.style.backgroundColor = "grey";
+    predictButton.style.backgroundColor = "grey";
+    predictButton.disabled = true;
+    predictionResult.style.backgroundColor = "grey";
+    clearCanvasButton.style.backgroundColor = "grey";
+    clearCanvasButton.disabled = true;
   } else {
-    trainModelButton.style.backgroundColor = "white"; // Change it back to white
+    trainModelButton.style.backgroundColor = "white";
+    canvasPredict.style.backgroundColor = "white";
+    predictButton.style.backgroundColor = "white";
+    predictButton.disabled = false;
+    predictionResult.style.backgroundColor = "white";
+    clearCanvasButton.style.backgroundColor = "white";
+    clearCanvasButton.disabled = false;
+    clearCanvas(canvasPredict);
   }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  updateTrainButtonState();
-});
-
-// function to check if the canvas is blank
-function isCanvasBlank(canvas) {
-  const blank = document.createElement("canvas"); // Create a temporary canvas
-  blank.width = canvas.width;
-  blank.height = canvas.height;
-
-  const blankCtx = blank.getContext("2d");
-  blankCtx.fillStyle = "#ffffff"; // Set to the same background color as your canvas
-  blankCtx.fillRect(0, 0, blank.width, blank.height);
-
-  return canvas.toDataURL() === blank.toDataURL(); // Compare data URLs
+function clearCanvas(canvas) {
+  const ctx = canvas.getContext("2d");
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    imageData.data[i] = 255;
+    imageData.data[i + 1] = 255;
+    imageData.data[i + 2] = 255;
+    imageData.data[i + 3] = 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
 }
 
-// after making the prediction the canvas should be cleared
+function isCanvasWhite(canvas) {
+  const context = canvas.getContext("2d");
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const red = imageData.data[i];
+    const green = imageData.data[i + 1];
+    const blue = imageData.data[i + 2];
+    const alpha = imageData.data[i + 3];
+    if (red !== 255 || green !== 255 || blue !== 255 || alpha !== 255) {
+      return false;
+    }
+  }
+  return true;
+}
+
 const predictButton = document.getElementById("predictButton");
 if (predictButton) {
   predictButton.addEventListener("click", function () {
     const canvas = document.getElementById("draw-canvas-predict");
-    const drawnImageData = canvas.toDataURL(); // Specify the image format
-
-    if (isCanvasBlank(canvas)) {
-      alert("Cannot save a blank canvas. Please draw something.");
-      return; // Exit the function if the canvas is blank
+    const drawnImageData = canvas.toDataURL();
+    if (isCanvasWhite(canvas)) {
+      alert("Can not save a blank canvas. Please draw something.");
+      return;
     }
-
-    // Send a POST request to the /make-prediction route with the drawn image data
     fetch("/make-prediction", {
       method: "POST",
       headers: {
@@ -128,18 +154,46 @@ if (predictButton) {
     })
       .then((response) => response.json())
       .then((data) => {
-        const canvas = document.getElementById("draw-canvas-predict");
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-        // Set the background color
-        ctx.fillStyle = "#ffffff"; // Set to white or any other color you prefer
-        ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the entire canvas
-        // Display the predicted number on the page
         const predictionResultElement =
           document.getElementById("predictionResult");
         if (predictionResultElement) {
           predictionResultElement.textContent = data.predicted_number;
         }
+        let chartPredictions = data.predictions[0];
+        chartPredictions.forEach((value, index, arr) => {
+          arr[index] = (Math.round(value * 100) / 100) * 100;
+        });
+        const minValue = Math.min(...chartPredictions);
+        const maxValue = Math.max(...chartPredictions);
+        let mappedChartPredictions = chartPredictions.map((value) => {
+          const mappedValue = ((value - minValue) / (maxValue - minValue)) * 6;
+          return mappedValue;
+        });
+        mappedChartPredictions.forEach((value, index, arr) => {
+          if (value === 0) {
+            arr[index] = 0.5;
+          }
+        });
+        const num0 = document.getElementById("num0");
+        const num1 = document.getElementById("num1");
+        const num2 = document.getElementById("num2");
+        const num3 = document.getElementById("num3");
+        const num4 = document.getElementById("num4");
+        const num5 = document.getElementById("num5");
+        const num6 = document.getElementById("num6");
+        const num7 = document.getElementById("num7");
+        const num8 = document.getElementById("num8");
+        const num9 = document.getElementById("num9");
+        num0.style.height = `${mappedChartPredictions[0]}rem`;
+        num1.style.height = `${mappedChartPredictions[1]}rem`;
+        num2.style.height = `${mappedChartPredictions[2]}rem`;
+        num3.style.height = `${mappedChartPredictions[3]}rem`;
+        num4.style.height = `${mappedChartPredictions[4]}rem`;
+        num5.style.height = `${mappedChartPredictions[5]}rem`;
+        num6.style.height = `${mappedChartPredictions[6]}rem`;
+        num7.style.height = `${mappedChartPredictions[7]}rem`;
+        num8.style.height = `${mappedChartPredictions[8]}rem`;
+        num9.style.height = `${mappedChartPredictions[9]}rem`;
       })
       .catch((error) => {
         console.error("Error making prediction:", error);
@@ -151,42 +205,36 @@ const clearCanvasButton = document.getElementById("clearCanvas");
 if (clearCanvasButton) {
   clearCanvasButton.addEventListener("click", function () {
     const canvas = document.getElementById("draw-canvas");
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Set the background color
-    ctx.fillStyle = "#ffffff"; // Set to white or any other color you prefer
-    ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the entire canvas
+    clearCanvas(canvas);
   });
 }
 
-// min 10 samples
+const clearCanvasButtonPred = document.getElementById("clearCanvasPred");
+if (clearCanvasButton) {
+  clearCanvasButtonPred.addEventListener("click", function () {
+    const canvas = document.getElementById("draw-canvas-predict");
+    clearCanvas(canvas);
+  });
+}
+
 let drawingCount = 0;
 function incrementDrawingCount() {
   drawingCount += 1;
-  updateTrainButtonState();
+  updateTrainState();
 }
 
 const saveDrawingButton = document.getElementById("saveDrawing");
 if (saveDrawingButton) {
   saveDrawingButton.addEventListener("click", function () {
     const canvas = document.getElementById("draw-canvas");
-    const imageData = canvas.toDataURL(); // Get the drawing as a data URL
-
-    if (isCanvasBlank(canvas)) {
-      alert("Cannot save a blank canvas. Please draw something.");
-      return; // Exit the function if the canvas is blank
+    const imageData = canvas.toDataURL();
+    if (isCanvasWhite(canvas)) {
+      alert("Can not save a blank canvas. Please draw something.");
+      return;
     }
-
-    const numberToDraw = document
-      .getElementById("numberToDraw")
-      .textContent.replace("Draw the Number: ", "");
-
-    // Capture the number to be drawn from the <h1> element
     const numberElement = document.getElementById("numberToDraw");
     if (numberElement) {
-      const label = numberElement.textContent.match(/\d+/)[0]; // Extract the number from the text
-
-      // Send the imageData and the label to the server
+      const label = numberElement.textContent.match(/\d+/)[0];
       fetch("/save-drawing", {
         method: "POST",
         headers: {
@@ -195,21 +243,13 @@ if (saveDrawingButton) {
         body: JSON.stringify({
           image: imageData,
           label: label,
-          numberToDraw: numberToDraw,
+          numberToDraw: label,
         }),
       })
         .then((response) => response.json())
         .then((data) => {
-          // You can also clear the canvas or give some feedback to the user here
-          incrementDrawingCount(); // increment the drawing count
-          const canvas = document.getElementById("draw-canvas");
-          const ctx = canvas.getContext("2d");
-          ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-          // Set the background color
-          ctx.fillStyle = "#ffffff"; // Set to white or any other color you prefer
-          ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the entire canvas
-
-          // Update the displayed random number with the new one from the server
+          incrementDrawingCount();
+          clearCanvas(canvas);
           const numberElement = document.getElementById("numberToDraw");
           if (numberElement) {
             numberElement.textContent = data.new_number;
@@ -226,23 +266,14 @@ const trainModelButton = document.getElementById("trainModel");
 if (trainModelButton) {
   trainModelButton.addEventListener("click", function () {
     if (drawingCount < 10) {
-      // Inform the user that more drawings are needed
       alert("You need to provide at least 10 samples to train the model.");
     } else {
-      // Proceed with the POST request to train the model
       fetch("/train-model", { method: "POST" })
         .then((response) => {
           if (response.ok) {
             alert("Model trained successfully!");
-            // Optionally reset drawing count after training
-            drawingCount = 0;
-          } else {
-            // Handle errors, such as not enough samples
-            response.json().then((data) => {
-              if (data.error) {
-                alert(data.error);
-              }
-            });
+            const canvas = document.getElementById("draw-canvas");
+            clearCanvas(canvas);
           }
         })
         .catch((error) => {
@@ -252,33 +283,65 @@ if (trainModelButton) {
   });
 }
 
-// canvas resizing problem fix
 function resizeCanvasToDisplaySize(canvas) {
   const width = canvas.offsetWidth;
   const height = canvas.offsetHeight;
 
-  // Check if the canvas size is different from its display size.
   if (canvas.width !== width || canvas.height !== height) {
-    // Set the internal canvas size to match the displayed size.
     canvas.width = width;
     canvas.height = height;
-    return true; // The canvas was resized.
+    return true;
   }
-
-  return false; // The canvas was not resized.
+  return false;
 }
 
-// Get your canvas element
 const canvas = document.getElementById("draw-canvas");
 const canvasPred = document.getElementById("draw-canvas-predict");
 
-// Resize the canvas whenever the window is resized or initially loaded
-window.addEventListener("resize", () => resizeCanvasToDisplaySize(canvas));
-document.addEventListener("DOMContentLoaded", () =>
-  resizeCanvasToDisplaySize(canvas)
-);
+window.addEventListener("resize", () => {
+  resizeCanvasToDisplaySize(canvas);
+  clearCanvas(canvas);
+});
 
-window.addEventListener("resize", () => resizeCanvasToDisplaySize(canvasPred));
-document.addEventListener("DOMContentLoaded", () =>
-  resizeCanvasToDisplaySize(canvasPred)
-);
+document.addEventListener("DOMContentLoaded", () => {
+  resizeCanvasToDisplaySize(canvas);
+  clearCanvas(canvas);
+});
+
+window.addEventListener("resize", () => {
+  resizeCanvasToDisplaySize(canvasPred);
+  clearCanvas(canvasPred);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  resizeCanvasToDisplaySize(canvasPred);
+  clearCanvas(canvasPred);
+});
+
+document.getElementById("infoButton").addEventListener("click", function () {
+  var overlay = document.getElementById("info_overlay");
+  var infoButton = document.getElementById("infoButton");
+  var crossButton = document.getElementById("crossButton");
+  var isHidden = overlay.style.display === "none";
+  if (isHidden) {
+    overlay.style.display = "block";
+  } else {
+    overlay.style.display = "none";
+  }
+  infoButton.style.display = "none";
+  crossButton.style.display = "inline-block";
+});
+
+document.getElementById("crossButton").addEventListener("click", function () {
+  var overlay = document.getElementById("info_overlay");
+  var infoButton = document.getElementById("infoButton");
+  var crossButton = document.getElementById("crossButton");
+  var isHidden = overlay.style.display === "none";
+  if (isHidden) {
+    overlay.style.display = "block";
+  } else {
+    overlay.style.display = "none";
+  }
+  crossButton.style.display = "none";
+  infoButton.style.display = "inline-block";
+});
