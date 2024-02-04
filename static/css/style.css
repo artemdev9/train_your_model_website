@@ -9,6 +9,7 @@ body{
 .UIstyle{
     background-color: white;
     border-radius: 20px;
+    color: black;
 }
 
 .title{
@@ -42,7 +43,7 @@ button:hover {
 
 .bottomArea{
     margin-top: 6%;
-    margin-bottom: 10%;
+    margin-bottom: 6%;
     width: 100%;
     height: 60vh;
     display: flex;
@@ -104,6 +105,7 @@ button:hover {
     margin: 0;
     height: 100%;
     width: 70%;
+    transition: 0.5s;
 }
 
 .saveclear{
@@ -129,6 +131,7 @@ button:hover {
 #draw-canvas-predict{
     width: 100%;
     height: 100%;
+    transition: 0.5s;
 }
 
 footer{
@@ -148,4 +151,128 @@ footer p{
 footer a{
     color: white;
     text-decoration: none;
+}
+
+.info{
+    display: none;
+    position: fixed;
+    right: 8vh;
+    top: 8vh;
+    transform: scale(1.2);
+    cursor: pointer;
+    z-index: 1010; /* Ensure it's above other content */
+}
+
+.closeInfo{
+    position: fixed;
+    right: 8vh;
+    top: 8vh;
+    transform: scale(1.2);
+    cursor: pointer;
+    z-index: 1010; /* Ensure it's above other content */
+    display: inline-block;
+}
+
+.info:hover{
+    transform: scale(1.4);
+}
+
+/* animate the alpha value of the background so that the info overlay disappers smoothly */
+.info_overlay{
+    display: block; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh; /* Half the height of the screen */
+    background: rgba( 75, 75, 75, 0.8);
+    z-index: 1000; /* Ensure it's above other content */
+    transition: all 0.5s;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #000000;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+p {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.canvas-instructions {
+    border: 2px solid #ccc;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.canvas-label {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0074cc;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.button:hover {
+    background-color: #0056a7;
+}
+
+#chartContainer{
+    display: flex;
+    justify-content: space-around;
+    align-items: end;
+    /* gap: 1vh; */
+    width: 50%;
+    margin-left: 25%;
+    margin-bottom: 4%;
+}
+
+.chart_bar{
+    background-color: white;
+    width: 2.5vw;
+    height: 6rem;
+    border-radius: 20px;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.numlabelContainer{
+    transition: all 0.5s;
+}
+
+.numlabelContainer:hover{
+    transform: scale(1.2);
+}
+
+.numlabel{
+    color: white;
+    display: flex;
+    justify-content: center;
+    margin: 5px;
+    font-size: 1.5rem;
 }
