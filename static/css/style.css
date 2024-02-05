@@ -160,7 +160,7 @@ footer a{
     top: 8vh;
     transform: scale(1.2);
     cursor: pointer;
-    z-index: 1010; /* Ensure it's above other content */
+    z-index: 1010; 
 }
 
 .closeInfo{
@@ -169,7 +169,7 @@ footer a{
     top: 8vh;
     transform: scale(1.2);
     cursor: pointer;
-    z-index: 1010; /* Ensure it's above other content */
+    z-index: 1010; 
     display: inline-block;
 }
 
@@ -177,16 +177,15 @@ footer a{
     transform: scale(1.4);
 }
 
-/* animate the alpha value of the background so that the info overlay disappers smoothly */
 .info_overlay{
     display: block; 
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh; /* Half the height of the screen */
-    background: rgba( 75, 75, 75, 0.8);
-    z-index: 1000; /* Ensure it's above other content */
+    height: 100vh; 
+    background: rgba( 75, 75, 75, 0.98);
+    z-index: 1000; 
     transition: all 0.5s;
 }
 
@@ -216,9 +215,6 @@ p {
     color: #ffffff;
 }
 
-.canvas-instructions {
-   
-}
 
 .canvas-label {
     font-weight: bold;
@@ -242,7 +238,6 @@ p {
     display: flex;
     justify-content: space-around;
     align-items: end;
-    /* gap: 1vh; */
     width: 50%;
     margin-left: 25%;
     margin-bottom: 4%;
