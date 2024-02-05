@@ -191,37 +191,33 @@ footer a{
 }
 
 .container {
-    max-width: 800px;
+    max-width: 80vw;
+    max-height: 60vh;
     margin: 0 auto;
     padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+   
 }
 
 h1 {
     font-size: 24px;
     margin-bottom: 20px;
-    color: #000000;
+    color: #ffffff;
 }
 
 h2 {
     font-size: 20px;
     margin-bottom: 10px;
-    color: #555;
+    color: #ffffff;
 }
 
 p {
     font-size: 20px;
     margin-bottom: 15px;
-    color: #666;
+    color: #ffffff;
 }
 
 .canvas-instructions {
-    border: 2px solid #ccc;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
+   
 }
 
 .canvas-label {
