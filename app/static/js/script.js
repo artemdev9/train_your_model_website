@@ -1,36 +1,33 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const canvas = document.getElementById("draw-canvas"); // Changed to 'draw-canvas-predict'
+  const canvas = document.getElementById("draw-canvas");
   const ctx = canvas.getContext("2d");
-  // Set the background color
   clearCanvas(canvas);
 
   let drawing = false;
 
   function startDrawing(e) {
     drawing = true;
-    draw(e); // To start drawing immediately
+    draw(e);
   }
 
   function endDrawing() {
     drawing = false;
-    ctx.beginPath(); // Begin a new path to start a new stroke
+    ctx.beginPath();
   }
 
   function draw(e) {
     if (!drawing) return;
 
-    ctx.lineWidth = 20; // Line width
-    ctx.lineCap = "round"; // Line cap style
+    ctx.lineWidth = 20;
+    ctx.lineCap = "round";
 
-    // Adjust for the offset of the canvas
     const rect = canvas.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top); // Move to mouse position
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
     ctx.stroke();
-    ctx.beginPath(); // Begin a new path
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top); // Move to mouse position
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   }
 
-  // Event listeners for mouse actions
   if (canvas) {
     canvas.addEventListener("mousedown", startDrawing);
     canvas.addEventListener("mouseup", endDrawing);
@@ -39,38 +36,36 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  const canvas = document.getElementById("draw-canvas-predict"); // Changed to 'draw-canvas-predict'
+  const canvas = document.getElementById("draw-canvas-predict");
   const ctx = canvas.getContext("2d");
-  // Set the background color
+
   clearCanvas(canvas);
 
   let drawing = false;
 
   function startDrawing(e) {
     drawing = true;
-    draw(e); // To start drawing immediately
+    draw(e);
   }
 
   function endDrawing() {
     drawing = false;
-    ctx.beginPath(); // Begin a new path to start a new stroke
+    ctx.beginPath();
   }
 
   function draw(e) {
     if (!drawing) return;
 
-    ctx.lineWidth = 20; // Line width
-    ctx.lineCap = "round"; // Line cap style
+    ctx.lineWidth = 20;
+    ctx.lineCap = "round";
 
-    // Adjust for the offset of the canvas
     const rect = canvas.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top); // Move to mouse position
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
     ctx.stroke();
-    ctx.beginPath(); // Begin a new path
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top); // Move to mouse position
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   }
 
-  // Event listeners for mouse actions
   if (canvas) {
     canvas.addEventListener("mousedown", startDrawing);
     canvas.addEventListener("mouseup", endDrawing);
