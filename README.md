@@ -1,4 +1,4 @@
-# train_your_model_website
+# Train Your Model Website
 
 ## Installation
 
