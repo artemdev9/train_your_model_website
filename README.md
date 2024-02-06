@@ -1,11 +1,11 @@
-# train_your_model_website
+# Train Your Model Website
 
 ## Installation
 
 ### Step 1
 
 ```bash
-# you have to be in the ..\app directory
+# you have to be in the ..\train_your_model_website-main\app directory
 pip install requirements.txt
 ```
 
@@ -14,6 +14,6 @@ pip install requirements.txt
 Run the flask app and make predictions.
 
 ```bash
-# you have to be in the ..\app directory
+# you have to be in the ..\train_your_model_website-main directory
 flask run
 ```
